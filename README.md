@@ -1,1 +1,1 @@
-THis Repo consist of source code for Financial Engineering & Risk Management Part I
+This Repo consist of source code for Financial Engineering & Risk Management Part I
