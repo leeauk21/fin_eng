@@ -244,7 +244,6 @@ class bs_bin_tree:
         for i in range(len(call)):
             res.append(max(call[i],put[i]))
         result=0
-        for i in range(0,len(res)):
-            result += self.nCr(10,i)* (self.q**(i)) * (1-self.q)**(10-i) * res[i]
+        for j in range(0,len(res)):
+            result += self.nCr(option_expire,j)* (self.q**(j)) * (1-self.q)**(option_expire-j) * res[j]
         return result
-
