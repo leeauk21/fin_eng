@@ -213,3 +213,14 @@ class bs_bin_tree:
             res.append(res_to_add)
         return {early_ex_time:early_ex_earning} if early_ex == True else False
 
+    def chooser_option_price(self,option_expire):
+        call = self.eu_call()[option_expire]
+        put = self.eu_put()[option_expire]
+        res=[]
+        for i in range(len(call)):
+            res.append(max(call[i],put[i]))
+        result=0
+        for i in range(0,len(res)):
+            result += nCr(10,i)* (bin.q**(i)) * (1-bin.q)**(10-i) * res[i]
+        return result
+
