@@ -42,6 +42,26 @@ class bs_bin_tree:
         price = ((1-self.q)*p1 + (self.q)*p2)/self.R
         return price
 
+    def eu_put(self):
+        arr = self.generate_price()
+        arr_rev = arr[::-1]
+        res=[]
+        for i in range(len(arr_rev)):
+            res_to_add = []
+            for j in range(len(arr_rev[i])):
+                if i == 0:
+                    a = max(self.K-arr_rev[i][j],0)
+                    res_to_add.append(a)
+                else:
+                    price = self.neutral_pricing(res[i-1][j], res[i-1][j+1])
+                    #a = max(arr_rev[i][j]-strike,0)
+                    #a = max(a,price)
+                    a = price
+                    res_to_add.append(a)
+                
+            res.append(res_to_add)
+        return res[::-1]
+
     def eu_call(self):
         arr = self.generate_price()
         arr_rev = arr[::-1]
@@ -213,6 +233,10 @@ class bs_bin_tree:
             res.append(res_to_add)
         return {early_ex_time:early_ex_earning} if early_ex == True else False
 
+    def nCr(self,n,r):
+        f = math.factorial
+        return f(n) / f(r) / f(n-r)
+    
     def chooser_option_price(self,option_expire):
         call = self.eu_call()[option_expire]
         put = self.eu_put()[option_expire]
@@ -221,6 +245,6 @@ class bs_bin_tree:
             res.append(max(call[i],put[i]))
         result=0
         for i in range(0,len(res)):
-            result += nCr(10,i)* (bin.q**(i)) * (1-bin.q)**(10-i) * res[i]
+            result += self.nCr(10,i)* (self.q**(i)) * (1-self.q)**(10-i) * res[i]
         return result
 
