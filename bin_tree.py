@@ -246,4 +246,4 @@ class bs_bin_tree:
         result=0
         for j in range(0,len(res)):
             result += self.nCr(option_expire,j)* (self.q**(j)) * (1-self.q)**(option_expire-j) * res[j]
-        return result
+        return (result/self.R**(option_expire))
