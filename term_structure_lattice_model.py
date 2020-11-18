@@ -1,3 +1,4 @@
+import numpy as np
 class TSLM:
 
     def __init__(self, r0, u, d, q, maturity,face_value):
@@ -73,47 +74,40 @@ class TSLM:
         return res[::-1][0][0]
 
 
+    def swap_lattice(self,start_t,fixed_rate):
+        r = self.gen_short_rate_lattice()[::-1]
+        res = []
+        for i in range(len(r)):
+            res_to_add = []
+            for j in range(len(r[i])):
+                if i > len(r)-1-start_t:
+                    a = self.risk_neutral_price(r[i][j],res[i-1][j],res[i-1][j+1])
+                elif i == 0:
+                    a = (r[i][j]-fixed_rate)/(1+r[i][j])
+                else:
+                    a = ((1+r[i][j])**(-1)) * (r[i][j]-fixed_rate + (1-self.q)*res[i-1][j] + self.q*res[i-1][j+1])
+                res_to_add.append(a)
+            res.append(res_to_add)
+        return res[::-1]
+
+    def swap_price(self,start_t,fixed_rate,swap_notional):
+        return self.swap_lattice(start_t,fixed_rate)[0][0]*swap_notional
 
 
-
-            
-
-
-
-
-dict_params= {'r0':0.05, 'u':1.1, 'd':0.9, 'q':0.5, 'maturity':10,'face_value':100}      
-test_params = {'r0':0.06, 'u':1.25, 'd':0.9, 'q':0.5, 'maturity':4,'face_value':100}
-def q1():
-    #test = TSLM(0.06,1.25,0.9,0.5,4,100)
-    test = TSLM(**dict_params)
-    return test.zcb_price()
-    #return test.zcb_price() 
-#q1_ans = q1()
-#print(q1_ans)
-
-
-def forward_on_zcb(forward_maturity):
-    top = TSLM(**dict_params).zcb_price()
-    bot = TSLM(0.05,1.1,0.9,0.5,forward_maturity,1).zcb_price()
-    return top/bot
-
-def q2():
-    return forward_on_zcb(4)
-#print(q2())
-
-def q3():
-    model = TSLM(**dict_params)
-    return model.future_zcb_price(4)
-#print(q3())
-#74.82
-
-def q4():
-    model = TSLM(**dict_params)
-    return model.us_call_zcb_price(6,80)
-#print(q4())
-#2.36
-
-
+    def swaption_price(self,start_t,fixed_rate,swap_maturity,strike,swap_notional):
+        r = self.gen_short_rate_lattice()[0:swap_maturity+1][::-1]
+        arr = self.swap_lattice(start_t,fixed_rate)[0:swap_maturity+1][::-1]
+        res = []
+        for i in range(len(arr)):
+            res_to_add = []
+            for j in range(len(arr[i])):
+                if i == 0:
+                    res_to_add.append(max(arr[i][j]-strike,0))
+                else:
+                    a = self.risk_neutral_price(r[i][j],res[i-1][j],res[i-1][j+1])
+                    res_to_add.append(a)
+            res.append(res_to_add)
+        return res[::-1][0][0]*swap_notional
 
 
 
